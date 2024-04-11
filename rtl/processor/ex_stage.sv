@@ -111,6 +111,14 @@ always_comb begin
 		`ALU_SRA: 	result = $signed(opa) >>> opb[4:0]; 
 		`ALU_SLT: 	result = {31'd0, ($signed(opa)< $signed(opb))};
 		`ALU_SLTU:	result = {31'd0, (opa < opb)};
+		`ALU_MUL:	begin	
+					temp = opa * opb; //DIKAMU
+					result = temp[31:0];
+				end
+		`ALU_MULHU:	begin 	
+					temp = opa * opb; //DIKAMU
+					result = temp[63:32];
+				end
 		default: 	result = 32'hbaadbeef;  
 	endcase	
 end
