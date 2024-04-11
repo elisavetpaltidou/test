@@ -1,0 +1,29 @@
+
+arch.o:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+00010074 <main>:
+   10074:	fe010113          	addi	sp,sp,-32
+   10078:	00812e23          	sw	s0,28(sp)
+   1007c:	02010413          	addi	s0,sp,32
+   10080:	075bd7b7          	lui	a5,0x75bd
+   10084:	d1578793          	addi	a5,a5,-747 # 75bcd15 <__global_pointer$+0x75ab445>
+   10088:	fef42623          	sw	a5,-20(s0)
+   1008c:	3ade77b7          	lui	a5,0x3ade7
+   10090:	8b178793          	addi	a5,a5,-1871 # 3ade68b1 <__global_pointer$+0x3add4fe1>
+   10094:	fef42423          	sw	a5,-24(s0)
+   10098:	fec42703          	lw	a4,-20(s0)
+   1009c:	fe842783          	lw	a5,-24(s0)
+   100a0:	02f707b3          	mul	a5,a4,a5
+   100a4:	fef42223          	sw	a5,-28(s0)
+   100a8:	fe442783          	lw	a5,-28(s0)
+   100ac:	0007d663          	bgez	a5,100b8 <main+0x44>
+   100b0:	fff00793          	li	a5,-1
+   100b4:	0080006f          	j	100bc <main+0x48>
+   100b8:	00000793          	li	a5,0
+   100bc:	00078513          	mv	a0,a5
+   100c0:	01c12403          	lw	s0,28(sp)
+   100c4:	02010113          	addi	sp,sp,32
+   100c8:	00008067          	ret
