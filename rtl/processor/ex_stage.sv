@@ -96,7 +96,7 @@ output logic brcond_result
 );
 
 logic [63:0] temp;
-
+assign temp = opa * opb;
 //result 
 always_comb begin
 	case (func)
@@ -111,14 +111,8 @@ always_comb begin
 		`ALU_SRA: 	result = $signed(opa) >>> opb[4:0]; 
 		`ALU_SLT: 	result = {31'd0, ($signed(opa)< $signed(opb))};
 		`ALU_SLTU:	result = {31'd0, (opa < opb)};
-		`ALU_MUL:	begin	
-					temp = opa * opb; //DIKAMU
-					result = temp[31:0];
-				end
-		`ALU_MULHU:	begin 	
-					temp = opa * opb; //DIKAMU
-					result = temp[63:32];
-				end
+		`ALU_MUL:	result = temp[31:0];
+		`ALU_MULHU:	result = temp[63:32];
 		default: 	result = 32'hbaadbeef;  
 	endcase	
 end

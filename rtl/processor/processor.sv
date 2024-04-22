@@ -16,7 +16,7 @@ module processor(
 	output logic [1:0]  im_command,
 
 	input logic [31:0] 	mem2proc_data,
-	output logic [31:0] proc2Dmem_addr,
+	output logic [31:0] proc2Dmem_addr,ac
 	output logic [1:0] 	proc2Dmem_command,
 	output logic [31:0] proc2mem_data,
 	
@@ -71,7 +71,7 @@ logic         	id_valid_inst_out;
 logic 			id_uncond_branch;
 logic 			id_cond_branch;
 logic [31:0]    id_pc_add_opa;
-logic			hazard_flag;
+logic 			id_hazard_flag;
 
 // Outputs from ID/EX Pipeline Register
 logic 			id_ex_reg_wr;
@@ -148,7 +148,7 @@ if_stage if_stage_0 (
 .ex_take_branch_out	(ex_mem_take_branch),
 .ex_target_PC_out	(ex_mem_target_PC),
 .Imem2proc_data		(instruction),
-
+.id_hazard_flag		(id_hazard_flag),
 
 // Outputs
 .if_NPC_out			(if_NPC_out),
@@ -163,7 +163,7 @@ if_stage if_stage_0 (
 //            IF/ID Pipeline Register           //
 //                                              //
 //////////////////////////////////////////////////
-assign if_id_enable = ~hazard_flag;
+assign if_id_enable = ~id_hazard_flag;
 
 always_ff @(posedge clk or posedge rst) begin
 	if(rst) begin
@@ -175,7 +175,7 @@ always_ff @(posedge clk or posedge rst) begin
     else if (if_id_enable) begin
 		if_id_PC         <=  if_PC_out;
 		if_id_NPC        <=  if_NPC_out;
-		if_id_IR         <=  if_IR_out;
+		if_id_IR         <=  (ex_take_branch_out) ? `NOOP_INST : if_IR_out;
         if_id_valid_inst <= if_valid_inst_out;
     end 
 end 
@@ -192,9 +192,9 @@ id_stage id_stage_0 (
 .rst   					(rst),
 .if_id_IR   			(if_id_IR),
 .if_id_PC				(if_id_PC),
+.mem_wb_dest_reg_idx	(mem_wb_dest_reg_idx),
 .id_ex_dest_reg_idx		(id_ex_dest_reg_idx),
 .ex_mem_dest_reg_idx	(ex_mem_dest_reg_idx),
-.mem_wb_dest_reg_idx	(mem_wb_dest_reg_idx),
 .mem_wb_valid_inst    	(mem_wb_valid_inst),
 .mem_wb_reg_wr			(mem_wb_reg_wr), 
 .wb_reg_wr_data_out     (wb_reg_wr_data_out),  	
@@ -216,9 +216,11 @@ id_stage id_stage_0 (
 .cond_branch			(id_cond_branch),
 .uncond_branch			(id_uncond_branch),
 .id_illegal_out			(id_illegal_out),
-.hazard_flag			(hazard_flag)
-.id_valid_inst_out		(id_valid_inst_out)
+.id_valid_inst_out		(id_valid_inst_out),
+.id_hazard_flag			(id_hazard_flag)
 );
+
+
 
 //////////////////////////////////////////////////
 //                                              //
@@ -266,7 +268,7 @@ always_ff @(posedge clk or posedge rst) begin
             id_ex_reg_wr        <=  id_reg_wr_out;
 			
 			id_ex_PC            <=  if_id_PC;
-			id_ex_IR            <=  if_id_IR;
+			id_ex_IR            <=  (id_hazard_flag | ex_take_branch_out) ? `NOOP_INST : if_id_IR;
 			id_ex_rega          <=  id_rega_out;
 			id_ex_regb          <=  id_regb_out;
 			id_ex_imm			<=  id_immediate_out;
