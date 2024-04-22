@@ -1,6 +1,6 @@
 int main() {
-    long int a = 123456789;
-    long int b = 987654321;
+    long int a = 5;
+    long int b = 9;
     int result;
 
     // Perform multiplication
