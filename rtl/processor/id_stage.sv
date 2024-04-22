@@ -164,6 +164,8 @@ input logic [31:0]	if_id_PC,
 input logic	        mem_wb_valid_inst,   	 	//Does the instruction write to rd?
 input logic	        mem_wb_reg_wr,   	 	//Does the instruction write to rd?
 input logic [4:0]	mem_wb_dest_reg_idx, 	//index of rd
+input logic [4:0]	id_ex_dest_reg_idx,     // ID/EX register
+input logic [4:0]	ex_mem_dest_reg_idx,    // EX/M register
 input logic [31:0] 	wb_reg_wr_data_out, 	// Reg write data from WB Stage
 input logic         if_id_valid_inst,
 
@@ -185,6 +187,7 @@ output logic 		cond_branch,
 output logic        uncond_branch,
 output logic       	id_illegal_out,
 output logic       	id_valid_inst_out	  	// is inst a valid instruction to be counted for CPI calculations?
+output logic		hazard_flag
 );
    
 logic dest_reg_select;
@@ -199,6 +202,16 @@ assign ra_idx=if_id_IR[19:15];	// inst operand A register index
 assign rb_idx=if_id_IR[24:20];	// inst operand B register index
 assign rc_idx=if_id_IR[11:7];  // inst operand C register index
 // Instantiate the register file used by this pipeline
+
+//Hazard detection mallon
+always_comb begin : Hazard_Detection_Unit
+	if(ra_idx != 0 && (ra_idx == id_ex_dest_reg_idx || ra_idx == ex_mem_dest_reg_idx || ra_idx == mem_wb_dest_reg_idx)){
+		hazard_flag = 1;}
+	else if(rb_idx != 0 && (rb_idx == id_ex_dest_reg_idx || rb_idx == ex_mem_dest_reg_idx || rb_idx == mem_wb_dest_reg_idx)){
+		hazard_flag = 1;}	
+	else 
+		hazard_flag = 0;
+end
 
 logic write_en;
 assign write_en=mem_wb_valid_inst & mem_wb_reg_wr;
