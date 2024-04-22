@@ -71,6 +71,7 @@ logic         	id_valid_inst_out;
 logic 			id_uncond_branch;
 logic 			id_cond_branch;
 logic [31:0]    id_pc_add_opa;
+logic			hazard_flag;
 
 // Outputs from ID/EX Pipeline Register
 logic 			id_ex_reg_wr;
@@ -162,7 +163,7 @@ if_stage if_stage_0 (
 //            IF/ID Pipeline Register           //
 //                                              //
 //////////////////////////////////////////////////
-assign if_id_enable = 1;
+assign if_id_enable = ~hazard_flag;
 
 always_ff @(posedge clk or posedge rst) begin
 	if(rst) begin
@@ -191,6 +192,8 @@ id_stage id_stage_0 (
 .rst   					(rst),
 .if_id_IR   			(if_id_IR),
 .if_id_PC				(if_id_PC),
+.id_ex_dest_reg_idx		(id_ex_dest_reg_idx),
+.ex_mem_dest_reg_idx	(ex_mem_dest_reg_idx),
 .mem_wb_dest_reg_idx	(mem_wb_dest_reg_idx),
 .mem_wb_valid_inst    	(mem_wb_valid_inst),
 .mem_wb_reg_wr			(mem_wb_reg_wr), 
@@ -213,6 +216,7 @@ id_stage id_stage_0 (
 .cond_branch			(id_cond_branch),
 .uncond_branch			(id_uncond_branch),
 .id_illegal_out			(id_illegal_out),
+.hazard_flag			(hazard_flag)
 .id_valid_inst_out		(id_valid_inst_out)
 );
 
